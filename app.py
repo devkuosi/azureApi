@@ -63,14 +63,20 @@ def check_role():
 
 @app.route("/home")
 def home():
-    '''if not "roles" in session["user"]:
-        return "NO ROLE FOUND"
-    roles = ""
-    user_roles = session["user"]["roles"]
-    for user_role in user_roles:
-        roles = roles + "|" + user_role
-    return "----- " + roles'''
-    return " ******* " + check_role()
+    auth_header = request.headers.get('Authorization')
+    if not auth_header:
+        return ('Authorization header is missing')
+    token = auth_header.split(' ')[1]
+    try:
+        result = jndemoApp.acquire_token_on_behalf_of(
+            request.params['access_token'],
+            scopes=['https://graph.microsoft.com/.default']
+        )
+        roles = result['id_token_claims']['roles']
+        return str(roles)
+    except Exception as e:
+        return ('Authentication failed')
+    #return " ******* "
 
 if __name__ == "__main__":
     app.run()
