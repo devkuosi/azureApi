@@ -75,7 +75,7 @@ def home():
         roles = result['id_token_claims']['roles']
         return str(roles)
     except Exception as e:
-        return ('Authentication failed')
+        return (str(e) + '    Authentication failed')
     #return " ******* "
 
 if __name__ == "__main__":
