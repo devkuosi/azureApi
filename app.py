@@ -40,11 +40,11 @@ def check_client_role(client_role):
     jwks = json.loads(jwks_response.text)
     res = res + " ###6 " + str(jwks)
 
-    '''kid = jwt_header["kid"]
+    kid = jwt_header["kid"]
     jwk = [key for key in jwks["keys"] if key["kid"] == kid][0]
     public_key = jwt.algorithms.RSAAlgorithm.from_jwk(json.dumps(jwk))
-    res = res + " ###5 " + str(public_key)
-    try:
+    res = res + " ###5 HERE"
+    '''try:
         decoded_token = jwt.decode(
             access_token,
             public_key,
