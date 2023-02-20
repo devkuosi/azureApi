@@ -94,7 +94,7 @@ def home():
         roles = roles + "|" + user_role
     return "----- " + roles'''
     res = check_client_role("")
-    return " ########### " + res
+    return " ++++++++++++++ " + res
 
 if __name__ == "__main__":
     app.run()
