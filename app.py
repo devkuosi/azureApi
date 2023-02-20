@@ -5,6 +5,7 @@ from flask import Flask, request
 from functools import wraps
 import requests
 import jwt
+import jwt.algorithms
 import json
 import logging
 
