@@ -69,13 +69,15 @@ def home():
     token = auth_header.split(' ')[1]
     try:
         result = jndemoApp.acquire_token_on_behalf_of(
-            token,
+            request.params['access_token'],
             scopes=['https://graph.microsoft.com/.default']
         )
-        roles = result['id_token_claims']['roles']
-        return str(roles)
+        return(result)
+        #roles = result['id_token_claims']['roles']
+
+        #return str(roles)
     except Exception as e:
-        return (str(e) + '    Authentication failed')
+        return ('Authentication failed')
     #return " ******* "
 
 if __name__ == "__main__":
