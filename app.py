@@ -6,6 +6,11 @@ from functools import wraps
 import requests
 import jwt
 import json
+import logging
+
+# Set the logging level for all azure-* libraries
+logger = logging.getLogger('azure')
+logger.setLevel(logging.ERROR)
 
 app = Flask(__name__)
 app.config.from_object(app_config)
@@ -14,36 +19,40 @@ Session(app)
 
 # Check client's role using AAD authentication
 def check_client_role(client_role):
-    res = ""
+    try:
+        res = ""
 
-    # Get access token from request headers
-    access_token = request.headers.get("Authorization").split(" ")[1]
+        # Get access token from request headers
+        access_token = request.headers.get("Authorization").split(" ")[1]
 
-    res = res + " ###1 " + str(access_token)
+        res = res + " ###1 " + str(access_token)
 
-    # Get AAD configuration
-    aad_config_response = requests.get("https://login.microsoftonline.com/b258091b-e0c8-406d-ab95-61fae999beee/.well-known/openid-configuration")
-    aad_config = json.loads(aad_config_response.text)
+        # Get AAD configuration
+        aad_config_response = requests.get("https://login.microsoftonline.com/b258091b-e0c8-406d-ab95-61fae999beee/.well-known/openid-configuration")
+        aad_config = json.loads(aad_config_response.text)
 
-    res = res + " ###2 " + str(aad_config)
+        res = res + " ###2 " + str(aad_config)
 
-    # Verify access token
-    jwt_header = jwt.get_unverified_header(access_token)
-    if jwt_header["alg"] != "RS256":
-        res = res + " ###3.0 " + str(jwt_header)
-        #return False
-    
-    res = res + " ###4 " + str(jwt_header)
+        # Verify access token
+        jwt_header = jwt.get_unverified_header(access_token)
+        if jwt_header["alg"] != "RS256":
+            res = res + " ###3.0 " + str(jwt_header)
+            #return False
+        
+        res = res + " ###4 " + str(jwt_header)
 
-    jwks_uri = aad_config["jwks_uri"]
-    jwks_response = requests.get(jwks_uri)
-    jwks = json.loads(jwks_response.text)
-    res = res + " ###6 " + str(jwks)
+        jwks_uri = aad_config["jwks_uri"]
+        jwks_response = requests.get(jwks_uri)
+        jwks = json.loads(jwks_response.text)
+        res = res + " ###6 " + str(jwks)
 
-    kid = jwt_header["kid"]
-    jwk = [key for key in jwks["keys"] if key["kid"] == kid][0]
-    public_key = jwt.algorithms.RSAAlgorithm.from_jwk(json.dumps(jwk))
-    res = res + " ###5 HERE"
+        kid = jwt_header["kid"]
+        jwk = [key for key in jwks["keys"] if key["kid"] == kid][0]
+        public_key = jwt.algorithms.RSAAlgorithm.from_jwk(json.dumps(jwk))
+        res = res + " ###5 HERE"
+    except Exception as err:
+        return str(err)
+
     '''try:
         decoded_token = jwt.decode(
             access_token,
