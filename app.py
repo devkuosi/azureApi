@@ -72,7 +72,7 @@ def home():
     for user_role in user_roles:
         roles = roles + "|" + user_role
     return "----- " + roles'''
-    print(check_client_role(""))
+    #print(check_client_role(""))
     return " ########### "
 
 if __name__ == "__main__":
