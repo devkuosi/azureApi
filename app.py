@@ -3,7 +3,7 @@ import app_config
 import requests, random, string, os
 from datetime import datetime
 from azure.keyvault.secrets import SecretClient
-from azure.identity import DefaultAzureCredential
+from azure.identity import AzureCliCredential
 import msal
 
 app = Flask(__name__)
@@ -16,7 +16,7 @@ scope = ["https://graph.microsoft.com/.default"]
 
 
 # Authenticate with Azure. First, obtain the DefaultAzureCredential
-credential = DefaultAzureCredential()
+credential = AzureCliCredential()
 
 # Next, get the client for the Key Vault. You must have first enabled managed identity
 # on the App Service for the credential to authenticate with Key Vault.
