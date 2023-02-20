@@ -32,12 +32,12 @@ vault_secret = keyvault_client.get_secret(api_secret_name)
 # want for the third-party API is in the value property. 
 app_secret = vault_secret.value
 
-app = msal.ConfidentialClientApplication(
+jndemoApp = msal.ConfidentialClientApplication(
     app_id, authority=authority,
     client_credential=app_secret
 )
 
-result = app.acquire_token_for_client(scopes=scope)
+result = jndemoApp.acquire_token_for_client(scopes=scope)
 access_token = result["access_token"]
 
 def check_role():
