@@ -5,7 +5,7 @@ from flask import Flask, request
 from functools import wraps
 import requests
 import jwt
-import jwt.algorithms
+from jwt.algorithms import RSAAlgorithm
 import json
 import logging
 
@@ -49,7 +49,7 @@ def check_client_role(client_role):
 
         kid = jwt_header["kid"]
         jwk = [key for key in jwks["keys"] if key["kid"] == kid][0]
-        public_key = jwt.algorithms.RSAAlgorithm.from_jwk(json.dumps(jwk))
+        public_key = RSAAlgorithm.from_jwk(json.dumps(jwk))
         res = res + " ###5 HERE"
     except Exception as err:
         return str(err)
@@ -94,7 +94,7 @@ def home():
         roles = roles + "|" + user_role
     return "----- " + roles'''
     res = check_client_role("")
-    return " ++++++++++++++ " + res
+    return " ******* " + res
 
 if __name__ == "__main__":
     app.run()
