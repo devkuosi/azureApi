@@ -69,7 +69,7 @@ def home():
     token = auth_header.split(' ')[1]
     try:
         result = jndemoApp.acquire_token_on_behalf_of(
-            request.params['access_token'],
+            token,
             scopes=['https://graph.microsoft.com/.default']
         )
         return(result)
@@ -77,7 +77,7 @@ def home():
 
         #return str(roles)
     except Exception as e:
-        return ('Authentication failed')
+        return (str(e) + '   Authentication failed')
     #return " ******* "
 
 if __name__ == "__main__":
