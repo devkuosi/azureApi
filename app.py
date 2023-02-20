@@ -37,29 +37,6 @@ jndemoApp = msal.ConfidentialClientApplication(
     client_credential=app_secret
 )
 
-result = jndemoApp.acquire_token_for_client(scopes=scope)
-access_token = result["access_token"]
-
-def check_role():
-    try: 
-        headers = {
-            "Authorization": "Bearer " + access_token,
-            "Content-Type": "application/json"
-        }
-
-        response = requests.get(
-            "https://graph.microsoft.com/v1.0/me/memberOf",
-            headers=headers
-        )
-
-        if response.status_code == 200:
-            roles = response.json().get("value", [])
-            return str(roles)
-        else:
-            "Failed to get roles"
-    except Exception as err:
-        return str(err)
-
 
 @app.route("/home")
 def home():
