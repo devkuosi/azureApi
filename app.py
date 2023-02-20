@@ -14,19 +14,18 @@ Session(app)
 
 # Check client's role using AAD authentication
 def check_client_role(client_role):
+    res = ""
+
     # Get access token from request headers
     access_token = request.headers.get("Authorization").split(" ")[1]
 
-    print("###1")
-    print(str(access_token))
+    res = res + " ###1 " + str(access_token)
 
     # Get AAD configuration
     aad_config_response = requests.get("https://login.microsoftonline.com/b258091b-e0c8-406d-ab95-61fae999beee/.well-known/openid-configuration")
     aad_config = json.loads(aad_config_response.text)
 
-
-    print("###2")
-    print(str(aad_config))
+    res = res + " ###2 " + str(aad_config)
 
     '''# Verify access token
     jwt_header = jwt.get_unverified_header(access_token)
@@ -57,7 +56,7 @@ def check_client_role(client_role):
     else:
         return False'''
     
-    return str("client_roles")
+    return str(res)
 
 # Decorator for checking client's role
 def requires_role(client_role):
@@ -79,8 +78,8 @@ def home():
     for user_role in user_roles:
         roles = roles + "|" + user_role
     return "----- " + roles'''
-    print(check_client_role(""))
-    return " ########### "
+    res = check_client_role("")
+    return " ########### " + res
 
 if __name__ == "__main__":
     app.run()
