@@ -1,88 +1,65 @@
-from flask import Flask, render_template, session, request, redirect, url_for
-from flask_session import Session  # https://pythonhosted.org/Flask-Session
-import app_config
 from flask import Flask, request
-from functools import wraps
-import requests
-import jwt
-from jwt.algorithms import RSAAlgorithm
-import json
-import logging
-
-# Set the logging level for all azure-* libraries
-logger = logging.getLogger('azure')
-logger.setLevel(logging.ERROR)
+import app_config
+import requests, random, string, os
+from datetime import datetime
+from azure.keyvault.secrets import SecretClient
+from azure.identity import DefaultAzureCredential
+import msal
 
 app = Flask(__name__)
 app.config.from_object(app_config)
-#app.config.from_object("config")
-Session(app)
+app.config["DEBUG"] = True
 
-# Check client's role using AAD authentication
-def check_client_role(client_role):
-    try:
-        res = ""
+authority = "https://login.microsoftonline.com/b258091b-e0c8-406d-ab95-61fae999beee"
+app_id = "88445fba-93f5-4848-b8a0-474058784036"
+scope = ["https://graph.microsoft.com/.default"]
 
-        # Get access token from request headers
-        access_token = request.headers.get("Authorization").split(" ")[1]
 
-        res = res + " ###1 " + str(access_token)
+# Authenticate with Azure. First, obtain the DefaultAzureCredential
+credential = DefaultAzureCredential()
 
-        # Get AAD configuration
-        aad_config_response = requests.get("https://login.microsoftonline.com/b258091b-e0c8-406d-ab95-61fae999beee/.well-known/openid-configuration")
-        aad_config = json.loads(aad_config_response.text)
+# Next, get the client for the Key Vault. You must have first enabled managed identity
+# on the App Service for the credential to authenticate with Key Vault.
+key_vault_url = "https://jndemovault.vault.azure.net/"
+keyvault_client = SecretClient(vault_url=key_vault_url, credential=credential)
 
-        res = res + " ###2 " + str(aad_config)
+# Obtain the secret: for this step to work you must add the app's service principal to
+# the key vault's access policies for secret management.
+api_secret_name = "jndemo"
+vault_secret = keyvault_client.get_secret(api_secret_name)
 
-        # Verify access token
-        jwt_header = jwt.get_unverified_header(access_token)
-        if jwt_header["alg"] != "RS256":
-            res = res + " ###3.0 " + str(jwt_header)
-            #return False
-        
-        res = res + " ###4 " + str(jwt_header)
+# The "secret" from Key Vault is an object with multiple properties. The key we
+# want for the third-party API is in the value property. 
+app_secret = vault_secret.value
 
-        jwks_uri = aad_config["jwks_uri"]
-        jwks_response = requests.get(jwks_uri)
-        jwks = json.loads(jwks_response.text)
-        res = res + " ###6 " + str(jwks)
+app = msal.ConfidentialClientApplication(
+    app_id, authority=authority,
+    client_credential=app_secret
+)
 
-        kid = jwt_header["kid"]
-        jwk = [key for key in jwks["keys"] if key["kid"] == kid][0]
-        public_key = RSAAlgorithm.from_jwk(json.dumps(jwk))
-        res = res + " ###5 HERE"
+result = app.acquire_token_for_client(scopes=scope)
+access_token = result["access_token"]
+
+def check_role():
+    try: 
+        headers = {
+            "Authorization": "Bearer " + access_token,
+            "Content-Type": "application/json"
+        }
+
+        response = requests.get(
+            "https://graph.microsoft.com/v1.0/me/memberOf",
+            headers=headers
+        )
+
+        if response.status_code == 200:
+            roles = response.json().get("value", [])
+            return str(roles)
+        else:
+            "Failed to get roles"
     except Exception as err:
         return str(err)
 
-    '''try:
-        decoded_token = jwt.decode(
-            access_token,
-            public_key,
-            algorithms=["RS256"],
-            audience=app.config["88445fba-93f5-4848-b8a0-474058784036"],
-        )
-    except jwt.exceptions.InvalidTokenError:
-        return False
-
-    # Check client's role
-    client_roles = decoded_token.get("roles", [])'''
-    '''if client_role in client_roles:
-        return True
-    else:
-        return False'''
-    
-    return str(res)
-
-# Decorator for checking client's role
-def requires_role(client_role):
-    def decorator(f):
-        @wraps(f)
-        def decorated_function(*args, **kwargs):
-            if not check_client_role(client_role):
-                return {"error": "Unauthorized"}, 401
-            return f(*args, **kwargs)
-        return decorated_function
-    return decorator
 
 @app.route("/home")
 def home():
@@ -93,8 +70,7 @@ def home():
     for user_role in user_roles:
         roles = roles + "|" + user_role
     return "----- " + roles'''
-    res = check_client_role("")
-    return " ******* " + res
+    return " ******* " + check_role()
 
 if __name__ == "__main__":
     app.run()
