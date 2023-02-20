@@ -3,7 +3,7 @@ import app_config
 import requests, random, string, os
 from datetime import datetime
 from azure.keyvault.secrets import SecretClient
-from azure.identity import AzureCliCredential
+from azure.identity import DefaultAzureCredential
 import msal
 
 app = Flask(__name__)
@@ -16,7 +16,7 @@ scope = ["https://graph.microsoft.com/.default"]
 
 
 # Authenticate with Azure. First, obtain the DefaultAzureCredential
-credential = AzureCliCredential()
+credential = DefaultAzureCredential()
 
 # Next, get the client for the Key Vault. You must have first enabled managed identity
 # on the App Service for the credential to authenticate with Key Vault.
@@ -79,24 +79,33 @@ if __name__ == "__main__":
 
 
 '''# Protected route that requires "Admin" role
-@app.route("/admin")
-@bearer.token_required
-@requires_role("Admin")
-def admin():
-    return {"message": "Welcome, Admin!"}
+@app.before_request
+def check_role():
+    headers = {
+        "Authorization": "Bearer " + access_token,
+        "Content-Type": "application/json"
+    }
 
-if __name__ == "__main__":
-    app.run()
+    response = requests.get(
+        "https://graph.microsoft.com/v1.0/me/memberOf",
+        headers=headers
+    )
+
+    if response.status_code == 200:
+        roles = response.json().get("value", [])
+        # Check if the client has a specific role
+        if "role_name" not in roles:
+            return "Unauthorized", 401
+    else:
+        return "Failed to get roles", 500
+@app.route("/protected_endpoint")
+def protected_endpoint():
+    # This endpoint is protected by the role check
+    return "Hello, world!"
+
 '''
 
 
 
 
-'''In this example, we use the Flask-Bearer library to handle bearer token authentication, and we use the check_client_role function to check the client's role based on the roles included in the access token. We also define a requires_role decorator that can be used to protect routes that require a specific client role.
-
-To use this app, you'll need to set the following configuration variables in a config.py file:
-
-
-Replace {tenant_id} and {client_id} with your AAD tenant ID and client ID, respectively.
-
-I hope this helps! Let me know if you have any questions.'''
+'''By using Flask's before_request decorator and RBAC, you can ensure that your Flask web API is secure and that only clients with the appropriate roles can access protected endpoints.'''
