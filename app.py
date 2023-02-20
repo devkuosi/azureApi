@@ -77,7 +77,7 @@ def home():
 
         #return str(roles)
     except Exception as e:
-        return (str(e) + '  Authentication failed')
+        return (str(e) + '   Authentication failed')
     #return " ******* "
 
 if __name__ == "__main__":
