@@ -35,14 +35,15 @@ def check_client_role(client_role):
     
     res = res + " ###4 " + str(jwt_header)
 
-    '''jwks_uri = aad_config["jwks_uri"]
+    jwks_uri = aad_config["jwks_uri"]
     jwks_response = requests.get(jwks_uri)
     jwks = json.loads(jwks_response.text)
 
     kid = jwt_header["kid"]
     jwk = [key for key in jwks["keys"] if key["kid"] == kid][0]
     public_key = jwt.algorithms.RSAAlgorithm.from_jwk(json.dumps(jwk))
-    try:
+    res = res + " ###5 " + str(public_key)
+    '''try:
         decoded_token = jwt.decode(
             access_token,
             public_key,
