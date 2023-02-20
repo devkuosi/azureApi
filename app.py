@@ -8,8 +8,8 @@ import jwt
 import json
 
 app = Flask(__name__)
-# app.config.from_object(app_config)
-app.config.from_object("config")
+app.config.from_object(app_config)
+#app.config.from_object("config")
 Session(app)
 
 # Check client's role using AAD authentication
@@ -18,7 +18,7 @@ def check_client_role(client_role):
     access_token = request.headers.get("Authorization").split(" ")[1]
 
     # Get AAD configuration
-    aad_config_response = requests.get(app.config["AAD_CONFIG_URL"])
+    aad_config_response = requests.get("https://login.microsoftonline.com/b258091b-e0c8-406d-ab95-61fae999beee/.well-known/openid-configuration")
     aad_config = json.loads(aad_config_response.text)
 
     # Verify access token
@@ -38,7 +38,7 @@ def check_client_role(client_role):
             access_token,
             public_key,
             algorithms=["RS256"],
-            audience=app.config["CLIENT_ID"],
+            audience=app.config["88445fba-93f5-4848-b8a0-474058784036"],
         )
     except jwt.exceptions.InvalidTokenError:
         return False
