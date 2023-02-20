@@ -17,11 +17,18 @@ def check_client_role(client_role):
     # Get access token from request headers
     access_token = request.headers.get("Authorization").split(" ")[1]
 
+    print("###1")
+    print(str(access_token))
+
     # Get AAD configuration
     aad_config_response = requests.get("https://login.microsoftonline.com/b258091b-e0c8-406d-ab95-61fae999beee/.well-known/openid-configuration")
     aad_config = json.loads(aad_config_response.text)
 
-    # Verify access token
+
+    print("###2")
+    print(str(aad_config))
+
+    '''# Verify access token
     jwt_header = jwt.get_unverified_header(access_token)
     if jwt_header["alg"] != "RS256":
         return False
@@ -44,13 +51,13 @@ def check_client_role(client_role):
         return False
 
     # Check client's role
-    client_roles = decoded_token.get("roles", [])
+    client_roles = decoded_token.get("roles", [])'''
     '''if client_role in client_roles:
         return True
     else:
         return False'''
     
-    return str(client_roles)
+    return str("client_roles")
 
 # Decorator for checking client's role
 def requires_role(client_role):
