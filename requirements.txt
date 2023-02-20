@@ -1,7 +1,7 @@
 app_config==1.0.1
+azure_storage==0.37.0
 Flask==2.2.3
-Flask_Session==0.4.0
-PyJWT==2.6.0
+msal==1.21.0
 requests==2.25.1
 Flask-Cors==3.0.10
 wheel==0.38.4
