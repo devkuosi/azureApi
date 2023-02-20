@@ -27,12 +27,15 @@ def check_client_role(client_role):
 
     res = res + " ###2 " + str(aad_config)
 
-    '''# Verify access token
+    # Verify access token
     jwt_header = jwt.get_unverified_header(access_token)
     if jwt_header["alg"] != "RS256":
-        return False
+        res = res + " ###3.0 " + str(jwt_header)
+        #return False
+    
+    res = res + " ###4 " + str(jwt_header)
 
-    jwks_uri = aad_config["jwks_uri"]
+    '''jwks_uri = aad_config["jwks_uri"]
     jwks_response = requests.get(jwks_uri)
     jwks = json.loads(jwks_response.text)
 
