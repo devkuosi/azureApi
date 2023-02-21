@@ -11,7 +11,7 @@ auth.init_app(app)
 
 # Define a protected route using the require_auth decorator
 @app.route('/home')
-@auth("api://b02f5fdf-b997-4afc-8459-e5b9d0929f4b/.default")
+@auth("testScope")
 def protected_route():
     return 'This route is protected!'
 
