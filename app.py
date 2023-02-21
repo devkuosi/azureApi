@@ -49,7 +49,7 @@ def home():
             token,
             scopes=['https://graph.microsoft.com/.default']
         )
-        return(result)
+        return("aaaa  " + str(result))
         #roles = result['id_token_claims']['roles']
 
         #return str(roles)
