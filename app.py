@@ -45,7 +45,7 @@ def home():
     token = auth_header.split(' ')[1]
     try:
         result = jndemoApp.acquire_token_on_behalf_of(
-            request.params['access_token'],
+            token,
             scopes=['https://graph.microsoft.com/.default']
         )
         return("aaaa " + str(result))
